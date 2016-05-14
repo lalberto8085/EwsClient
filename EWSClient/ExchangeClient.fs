@@ -40,7 +40,7 @@ type Client(endpoint, user, pwd) =
         let view = new CalendarView(startDate, endDate)
         view.PropertySet <- properties
 
-        let folder = new FolderId(WellKnownFolderName.Calendar, new Mailbox(email))
+        let folder = getFolderId email
 
         client.FindAppointments(folder, view)
 
@@ -49,3 +49,22 @@ type Client(endpoint, user, pwd) =
         let mutable obj = ""
         this.GetAppointments(email, startDate, endDate, timeZone)
                 |> Seq.filter (fun a -> a.TryGetProperty(OneBodyId, ref obj))
+
+
+    member this.GetByOneId(email, oneId, timeZone) =
+        let filter = new SearchFilter.IsEqualTo(OneBodyId, oneId)
+        let folder = getFolderId email
+        let view = new ItemView(1)
+        view.PropertySet <- properties
+
+        let client = getClient timeZone
+
+        let appointment = client.FindItems(folder, filter, view) |> Seq.cast<Appointment> |> Seq.tryHead
+        match appointment with
+        | None -> None
+        | Some app -> 
+            let extendedProperties = new PropertySet(properties)
+            extendedProperties.Add(ItemSchema.Body)
+            app.Load(extendedProperties)
+            Some app
+        
