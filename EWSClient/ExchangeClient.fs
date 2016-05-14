@@ -51,7 +51,7 @@ type Client(endpoint, user, pwd) =
                 |> Seq.filter (fun a -> a.TryGetProperty(OneBodyId, ref obj))
 
 
-    member this.GetByOneId(email, oneId, timeZone) =
+    member this.GetByOneId(email, oneId: string, timeZone) =
         let filter = new SearchFilter.IsEqualTo(OneBodyId, oneId)
         let folder = getFolderId email
         let view = new ItemView(1)
@@ -59,14 +59,17 @@ type Client(endpoint, user, pwd) =
 
         let client = getClient timeZone
 
-        let appointment = client.FindItems(folder, filter, view) |> Seq.cast<Appointment> |> Seq.tryHead
-        match appointment with
-        | None -> None
-        | Some app -> 
+        let loadBody (app: Appointment) =
             let extendedProperties = new PropertySet(properties)
             extendedProperties.Add(ItemSchema.Body)
             app.Load(extendedProperties)
-            Some app
+            app
+
+        client.FindItems(folder, filter, view) 
+        |> Seq.cast<Appointment> 
+        |> Seq.tryHead
+        |> Option.map loadBody
+
 
     member this.GetByOneIds(email, timeZone, oneIds: string list) =
         let filters = oneIds |> Seq.map (fun id -> new SearchFilter.IsEqualTo(OneBodyId, id))
