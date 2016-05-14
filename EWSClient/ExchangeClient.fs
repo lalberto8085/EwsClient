@@ -24,7 +24,14 @@ type Client(endpoint, user, pwd) =
         client.Url <- endpoint
         client.Credentials <- ExchangeCredentials.op_Implicit(new NetworkCredential())
 
-        34
+        client
 
-    member this.GetAppointments(email) =
-        35
+    member this.GetAppointments(email, startDate, endDate, timeZone) =
+        let client = getClient timeZone
+        
+        let view = new CalendarView(startDate, endDate)
+        view.PropertySet <- properties
+
+        let folder = new FolderId(WellKnownFolderName.Calendar, new Mailbox(email))
+
+        client.FindAppointments(folder, view)
