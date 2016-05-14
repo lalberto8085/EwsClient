@@ -43,3 +43,9 @@ type Client(endpoint, user, pwd) =
         let folder = new FolderId(WellKnownFolderName.Calendar, new Mailbox(email))
 
         client.FindAppointments(folder, view)
+
+
+    member this.GetAppointmentsWithOneBodyId(email, startDate, endDate, timeZone) =
+        let mutable obj = ""
+        this.GetAppointments(email, startDate, endDate, timeZone)
+                |> Seq.filter (fun a -> a.TryGetProperty(OneBodyId, ref obj))
