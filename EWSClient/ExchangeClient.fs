@@ -5,6 +5,12 @@ open System
 open System.Net
 open Microsoft.Exchange.WebServices.Data
 
+let public OneBodyId = new ExtendedPropertyDefinition(DefaultExtendedPropertySet.PublicStrings,
+                                                      "AppointmentID", MapiPropertyType.String)
+
+let public AppointmentType = new ExtendedPropertyDefinition(DefaultExtendedPropertySet.PublicStrings,
+                                                            "AppointmentType", MapiPropertyType.String)
+
 type Client(endpoint, user, pwd) =
 
     let properties = 
@@ -15,7 +21,9 @@ type Client(endpoint, user, pwd) =
                         AppointmentSchema.End,
                         AppointmentSchema.Location,
                         AppointmentSchema.IsAllDayEvent,
-                        AppointmentSchema.IsRecurring)
+                        AppointmentSchema.IsRecurring,
+                        OneBodyId,
+                        AppointmentType)
 
     let getFolderId email = new FolderId(WellKnownFolderName.Calendar, new Mailbox(email))
 
