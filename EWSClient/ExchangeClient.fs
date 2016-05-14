@@ -67,4 +67,17 @@ type Client(endpoint, user, pwd) =
             extendedProperties.Add(ItemSchema.Body)
             app.Load(extendedProperties)
             Some app
+
+    member this.GetByOneIds(email, timeZone, oneIds: string list) =
+        let filters = oneIds |> Seq.map (fun id -> new SearchFilter.IsEqualTo(OneBodyId, id))
+                             |> Seq.cast<SearchFilter>
+                             |> Seq.toArray
+        let filter = new SearchFilter.SearchFilterCollection(LogicalOperator.Or, filters)
+        let folder = getFolderId email
+        let view = new ItemView(oneIds |> List.length)
+        view.PropertySet <- properties
+
+        let client = getClient timeZone
+
+        client.FindItems(folder, filter, view) |> Seq.cast<Appointment> |> Seq.toList
         
