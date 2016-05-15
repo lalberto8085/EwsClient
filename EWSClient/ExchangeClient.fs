@@ -25,7 +25,7 @@ let public OneBodyId = new ExtendedPropertyDefinition(DefaultExtendedPropertySet
 let public AppointmentType = new ExtendedPropertyDefinition(DefaultExtendedPropertySet.PublicStrings,
                                                             "AppointmentType", MapiPropertyType.String)
 
-type Client(endpoint, user, pwd) =
+type Client(endpoint, user: string, pwd: string) =
 
     let properties = 
         new PropertySet(ItemSchema.Id,
@@ -73,7 +73,7 @@ type Client(endpoint, user, pwd) =
     let getClient timeZone =
         let client = ExchangeService(ExchangeVersion.Exchange2010_SP2, timeZone)
         client.Url <- endpoint
-        client.Credentials <- ExchangeCredentials.op_Implicit(new NetworkCredential())
+        client.Credentials <- ExchangeCredentials.op_Implicit(new NetworkCredential(user, pwd))
 
         client
 
