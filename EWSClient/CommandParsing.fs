@@ -4,7 +4,9 @@ module CommandParsing
 open System
 open System.IO
 
-type TZ = CommandTimeZone of string
+open Common
+open Common.Result
+open Common.TimeZone
 
 type IntervalCommand = {
     Start: DateTime
@@ -16,7 +18,6 @@ type OneIdCommand = OneId of string
                   | OneIds of string list
 
 type CommandType = Interval of IntervalCommand | OneId of OneIdCommand
-
 
 type ClientOptions = {
     Command: CommandType
@@ -31,23 +32,6 @@ type CommandOptions = {
     Output : OutputType
     Command: ClientOptions
 }
-
-let public Pacific = CommandTimeZone "Pacific Standard Time"
-let public Central = CommandTimeZone "Central Standard Time"
-let public Eastern = CommandTimeZone "Eastern Standard Time"
-let public Atlantic = CommandTimeZone "Atlantic Standard Time"
-let public Mountain = CommandTimeZone "Mountain Standard Time"
-let public Alaskan = CommandTimeZone "Alaskan Standard Time"
-let public Hawaiian = CommandTimeZone "Hawaiian Standard Time"
-let public Samoa = CommandTimeZone "Samoa Standard Time"
-
-let mapped = ["EST", Eastern; "AKT", Alaskan;  "SST", Samoa;
-              "CST", Central; "MST", Mountain; "ATT", Atlantic;
-              "PST", Pacific; "HST", Hawaiian;]
-              |> Map.ofList
-
-let convert (CommandTimeZone tz) =
-    TimeZoneInfo.FindSystemTimeZoneById(tz)
 
 let rec private parseInterval command args =    
     match args with
@@ -74,9 +58,9 @@ let private parseOneIds args =
 let private parseClientCommand args =
     match args with
     | email :: tz :: commandType :: rest ->
-        let timeZone = match mapped |> Map.tryFind tz with
-                       | Some t -> t
-                       | None -> failwithf "unknown time zone %s" tz
+        let timeZone = match tz |> TimeZone.fromCode with
+                       | Success t -> t
+                       | Failure e -> raise e
         match commandType with
         | "id" -> 
            { Command = CommandType.OneId (parseOneIds rest); TimeZone = timeZone; Email = email}
@@ -87,7 +71,7 @@ let private parseClientCommand args =
 
     | x -> failwithf "invalid command %A" x
 
-let parseCommand args =
+let private parseCommand args =
     match args with
     | conf :: "-o" :: file :: rest when File.Exists(conf) ->
         let command = parseClientCommand rest
@@ -96,9 +80,9 @@ let parseCommand args =
         let command = parseClientCommand rest
         {ConfigFilePath = conf; Output = OutputType.Console; Command = command}
     | "help" :: "tz" :: [] ->
-        let timeZoneCodes = mapped |> Map.toList 
-                                   |> List.map (fun (code, CommandTimeZone name) -> sprintf "%s -> %s" code name)
-                                   |> List.reduce (fun c n -> c + Environment.NewLine + n)    
+        let timeZoneCodes = TimeZone.timeZoneCodes 
+                            |> List.map (fun (code, TimeZone name) -> sprintf "%s -> %s" code name)
+                            |> List.reduce (fun c n -> c + Environment.NewLine + n)    
         failwith timeZoneCodes
     | "help" :: [] ->
         let message = [ "<config-file> [-o <output-file>] <email> <time-zone-code> {id [|<ids>|] | interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]}" ;
@@ -129,4 +113,6 @@ let parseCommand args =
     | _ -> 
         failwithf "Invalid arguments %s Type help for more details" Environment.NewLine
 
+let tryParse args =
+    Result.run (fun () -> parseCommand args)
 
