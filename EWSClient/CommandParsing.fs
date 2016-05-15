@@ -14,10 +14,7 @@ type IntervalCommand = {
     FilterOneId: bool
 }
 
-type OneIdCommand = OneId of string
-                  | OneIds of string list
-
-type CommandType = Interval of IntervalCommand | OneId of OneIdCommand
+type CommandType = Interval of IntervalCommand | OneId of string | OneIds of string list
 
 type ClientOptions = {
     Command: CommandType
@@ -50,9 +47,9 @@ let rec private parseInterval command args =
 let private parseOneIds args =
     match args with
     | "-id" :: id :: [] -> 
-        OneIdCommand.OneId id
+        OneId id
     | "-id" :: rest ->
-        OneIdCommand.OneIds rest
+        OneIds rest
     | x -> failwithf "invalid argument supplied %A" x
 
 let private parseClientCommand args =
@@ -63,7 +60,7 @@ let private parseClientCommand args =
                        | Failure e -> raise e
         match commandType with
         | "id" -> 
-           { Command = CommandType.OneId (parseOneIds rest); TimeZone = timeZone; Email = email}
+           { Command = parseOneIds rest; TimeZone = timeZone; Email = email}
         | "interval" -> 
            let emptyCommand = { Start = DateTime.Now.Subtract(TimeSpan.FromDays(30.0)); End = DateTime.Now; FilterOneId = false}
            { Command = CommandType.Interval (parseInterval emptyCommand rest); TimeZone = timeZone; Email = email} 
