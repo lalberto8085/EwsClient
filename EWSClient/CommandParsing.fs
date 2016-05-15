@@ -95,9 +95,38 @@ let parseCommand args =
     | conf :: rest when File.Exists(conf) ->
         let command = parseClientCommand rest
         {ConfigFilePath = conf; Output = OutputType.Console; Command = command}
+    | "help" :: "tz" :: [] ->
+        let timeZoneCodes = mapped |> Map.toList 
+                                   |> List.map (fun (code, CommandTimeZone name) -> sprintf "%s -> %s" code name)
+                                   |> List.reduce (fun c n -> c + Environment.NewLine + n)    
+        failwith timeZoneCodes
+    | "help" :: [] ->
+        let message = [ "<config-file> [-o <output-file>] <email> <time-zone-code> {id [|<ids>|] | interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]}" ;
+                        "";
+                        "<config-file>: path to a file (json)formatted like { Url: xxx, User: xxx, Password: xxx}";
+                        "-o <output-file>: path to the json-formatted file to be written to, if the -o flag is not present results will be written to console";
+                        "<email>: the email whose calendar will be queried";
+                        "<time-zone-code>: time zone to visualize the dates. Type 'help tz' to see time zones info";
+                        "====================================";
+                        "Filter by OneBodyIds";
+                        "====================================";
+                        "id [|ids|]: only appointments having the OneBodyId field in the [|ids|] list will be returned";
+                        "[|ids|]: list of (at least one) OneBodyIds to filter by"
+                        "";
+                        "====================================";
+                        "Filter by interval";
+                        "====================================";
+                        "interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]: only appointments in the interval will be returned";
+                        "-s ...: Interval starting date. If not specified will be 30 days before current date, otherwise <year>, <month>, <day> are required";
+                        "-e ...: Interval ending date. If not specified will be the current date, otherwise <year>, <month>, <day> are required";
+                        "-id: Only appointments in the given interval with the OneBodyId field set"
+                        ] 
+                      |> List.reduce (fun c n -> c + Environment.NewLine + n)
+        
+        failwith message
     | conf :: rest ->
         failwithf "invalid configuration file %s" conf
     | _ -> 
-        failwith "invalid arguments"
+        failwithf "Invalid arguments %s Type help for more details" Environment.NewLine
 
 
