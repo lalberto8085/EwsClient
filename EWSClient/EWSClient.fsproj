@@ -59,6 +59,7 @@
     <Compile Include="ExchangeClient.fs" />
     <Compile Include="CommandParsing.fs" />
     <Compile Include="ConfigParser.fs" />
+    <Compile Include="CommandProcessor.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
