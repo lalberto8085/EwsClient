@@ -65,6 +65,7 @@ module TimeZone =
     /// get a TimeZone from its code
     let fromCode code =
         Result.run (fun() -> timeZoneCodeMap |> Map.find code)
+         |> Result.mapFailure (fun _ -> sprintf "invalid time zone code %s" code)
 
 
 

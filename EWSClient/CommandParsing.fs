@@ -56,7 +56,7 @@ let private parseClientCommand args =
     | email :: tz :: commandType :: rest ->
         let timeZone = match tz |> TimeZone.fromCode with
                        | Success t -> t
-                       | Failure e -> raise e
+                       | Failure msg -> failwith msg
         match commandType with
         | "id" -> 
            { Command = parseOneIds rest; TimeZone = timeZone; Email = email}
