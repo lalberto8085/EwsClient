@@ -46,11 +46,10 @@ let rec private parseInterval command args =
 
 let private parseOneIds args =
     match args with
-    | "-id" :: id :: [] -> 
+    | id :: [] -> 
         OneId id
-    | "-id" :: rest ->
+    | rest ->
         OneIds rest
-    | x -> failwithf "invalid argument supplied %A" x
 
 let private parseClientCommand args =
     match args with
@@ -82,7 +81,8 @@ let private parseCommand args =
                             |> List.reduce (fun c n -> c + Environment.NewLine + n)    
         failwith timeZoneCodes
     | "help" :: [] ->
-        let message = [ "<config-file> [-o <output-file>] <email> <time-zone-code> {id [|<ids>|] | interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]}" ;
+        let message = [ "";
+                        "<config-file> [-o <output-file>] <email> <time-zone-code> {id [|<ids>|] | interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]}" ;
                         "";
                         "<config-file>: path to a file (json)formatted like { Url: xxx, User: xxx, Password: xxx}";
                         "-o <output-file>: path to the json-formatted file to be written to, if the -o flag is not present results will be written to console";
