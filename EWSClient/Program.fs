@@ -1,7 +1,13 @@
-﻿// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
+﻿
+open Common
 
 [<EntryPoint>]
 let main argv = 
-    printfn "%A" argv
+
+    let processCommand = ConfigParser.parseConfiguration >> CommandProcessor.run
+
+    argv |> List.ofArray 
+         |> CommandParsing.tryParse 
+         |> Result.fold processCommand (fun ex -> printfn "%s" ex.Message)
+
     0 // return an integer exit code
