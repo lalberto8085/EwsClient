@@ -45,10 +45,10 @@ type Client(endpoint, user: string, pwd: string) =
         app.Load(extendedProperties)
         app
 
-    let loadExtProp (property: ExtendedPropertyDefinition) (app: Appointment) =
-        let mutable result = ""
-        if app.TryGetProperty(property, ref result) then
-            Some result
+    let getExtProp (property: ExtendedPropertyDefinition) (app: Appointment) =
+        let couldGet, value = app.TryGetProperty(property)
+        if couldGet then
+            value |> string |> Some
         else
             None
 
@@ -58,7 +58,7 @@ type Client(endpoint, user: string, pwd: string) =
                      else app
         {
             EwsId = loaded.Id.UniqueId
-            OneId = loadExtProp OneBodyId loaded
+            OneId = getExtProp OneBodyId loaded
             Subject = loaded.Subject |> Option.ofObj
             Start = loaded.Start
             End = loaded.End
@@ -66,7 +66,7 @@ type Client(endpoint, user: string, pwd: string) =
             IsAllDay = loaded.IsAllDayEvent
             IsRecurring = loaded.IsRecurring
             Location = loaded.Location
-            AppointmentType = loadExtProp OneBodyId loaded
+            AppointmentType = getExtProp OneBodyId loaded
             Body = if includeBody then loaded.Body.Text |> Option.ofObj else None
         }
 
@@ -95,9 +95,8 @@ type Client(endpoint, user: string, pwd: string) =
 
 
     member this.GetAppointmentsWithOneBodyId(email, startDate, endDate, timeZone) =
-        let mutable obj = ""
         getInInterval email startDate endDate timeZone
-                |> Seq.filter (fun a -> a.TryGetProperty(OneBodyId, ref obj))
+                |> Seq.filter ((getExtProp OneBodyId) >> Option.isSome)
                 |> Seq.map (toDto false)
 
 
