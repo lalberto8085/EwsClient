@@ -73,7 +73,7 @@ type Client(endpoint, user: string, pwd: string) =
     let getClient timeZone =
         let client = ExchangeService(ExchangeVersion.Exchange2010_SP2, timeZone)
         client.Url <- endpoint
-        client.Credentials <- ExchangeCredentials.op_Implicit(new NetworkCredential(user, pwd))
+        client.Credentials <- WebCredentials(user, pwd)
 
         client
 
