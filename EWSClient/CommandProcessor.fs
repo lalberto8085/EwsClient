@@ -36,5 +36,5 @@ let run (command: ConfigurationCommand) =
                  | OneIds ids ->
                     client.GetByOneIds(command.Command.Email, timeZone, ids)
 
-    JsonConvert.SerializeObject(result |> Seq.toList) |> output
+    result |> JsonFormatting.serialize |> output
                     

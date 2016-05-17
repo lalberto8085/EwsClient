@@ -22,7 +22,7 @@ let private parseConfig (file: string) =
     use reader = new StreamReader(file)
     let data = reader.ReadToEnd()
 
-    JsonConvert.DeserializeObject<ConfigurationInfo>(data)
+    JsonFormatting.deserialize<ConfigurationInfo> data
 
 let parseConfiguration (command: CommandOptions) =
     let config = parseConfig command.ConfigFilePath
