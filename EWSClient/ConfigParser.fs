@@ -2,7 +2,6 @@
 module ConfigParser
 
 open System.IO
-open Newtonsoft.Json
 open CommandParsing
 
 type ConfigurationInfo = {

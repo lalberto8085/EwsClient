@@ -3,7 +3,6 @@ module CommandProcessor
 
 open System
 open System.IO
-open Newtonsoft.Json
 
 open Common
 open CommandParsing

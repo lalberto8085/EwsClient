@@ -38,7 +38,7 @@ let rec private parseInterval command args =
     | "-e" :: year :: month :: day :: rest -> 
         let cmd = {command with End = new DateTime(int year, int month, int day)}
         parseInterval cmd rest
-    | "-id" :: rest ->
+    | "-id" :: _ ->
         {command with FilterOneId = true}
     | [] ->
         command
@@ -46,7 +46,7 @@ let rec private parseInterval command args =
 
 let private parseOneIds args =
     match args with
-    | id :: [] -> 
+    | [id] -> 
         OneId id
     | rest ->
         OneIds rest
@@ -75,12 +75,13 @@ let private parseCommand args =
     | conf :: rest when File.Exists(conf) ->
         let command = parseClientCommand rest
         {ConfigFilePath = conf; Output = OutputType.Console; Command = command}
-    | "help" :: "tz" :: [] ->
+    | "help" :: ["tz"] ->
         let timeZoneCodes = TimeZone.timeZoneCodes 
                             |> List.map (fun (code, TimeZone name) -> sprintf "%s -> %s" code name)
                             |> List.reduce (fun c n -> c + Environment.NewLine + n)    
         failwith timeZoneCodes
-    | "help" :: [] ->
+    | ["help"] 
+    | [] ->
         let message = [ "";
                         "<config-file> [-o <output-file>] <email> <time-zone-code> {id [|<ids>|] | interval [-s <year> <month> <day>] [-e <year> <month> <day>] [-id]}" ;
                         "";
@@ -105,7 +106,7 @@ let private parseCommand args =
                       |> List.reduce (fun c n -> c + Environment.NewLine + n)
         
         failwith message
-    | conf :: rest ->
+    | conf :: rest when not(rest |> List.isEmpty) ->
         failwithf "invalid configuration file %s" conf
     | _ -> 
         failwithf "Invalid arguments %s Type help for more details" Environment.NewLine

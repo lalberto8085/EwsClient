@@ -17,14 +17,14 @@ type private OptionConverter() =
             let innerType = objectType.GetGenericArguments().[0]
             let value = serializer.Deserialize(reader, innerType)
             let cases = FSharpType.GetUnionCases(objectType)
-            if value = null 
+            if value |> isNull
                 then FSharpValue.MakeUnion(cases.[0], [||])
                 else FSharpValue.MakeUnion(cases.[1], [|value|])
 
 
     override this.WriteJson(writer, value, serializer) =
         let value = 
-            if value = null then JsonToken.Null :> obj
+            if value |> isNull then JsonToken.Null :> obj
             else
                 let _, fields = FSharpValue.GetUnionFields(value, value.GetType())
                 fields.[0]

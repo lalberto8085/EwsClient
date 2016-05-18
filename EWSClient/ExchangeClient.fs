@@ -2,7 +2,6 @@
 module ExchangeClient
 
 open System
-open System.Net
 open Microsoft.Exchange.WebServices.Data
 
 type AppointmentDto = {

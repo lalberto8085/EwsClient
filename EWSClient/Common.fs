@@ -7,8 +7,6 @@ module Funcs =
 
 module Result = 
 
-    open System
-
     type R<'s, 'f> = Success of 's | Failure of 'f
 
     /// runs the given func and wraps any exception in Failure
